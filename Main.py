@@ -1,26 +1,37 @@
 import pygame
+import math
 from Game import Game
 from Monster import Pics
 from player import Player
 
 pygame.init()
 
+#charger le jeu
+game = Game()
 
 #Affichage écran
 pygame.display.set_caption("Sonic")
-W = 1022
-H = 498
-screen = pygame.display.set_mode((W,H))
+screen = pygame.display.set_mode((game.W,game.H))
 
 background = pygame.image.load("img/Green_Hill.png")
-piegeBackground = Pics()
+
+piegeBackground = Pics(game)
 
 #Position de l'image
 x = 0
 
-#charger le jeu
-game = Game()
+#Coordonnées play_button
+play_button_x_min = 371
+play_button_x_max = 648
+play_button_y_min = 249
+play_button_y_max = 347
 
+#importer/charger la bannière
+banner = pygame.image.load("img/Banniere/banner0.jpg")
+banner = pygame.transform.scale(banner, (game.W,game.H))
+banner_rect = banner.get_rect()
+
+#########
 
 running = True
 
@@ -28,67 +39,22 @@ running = True
 while running:
 
 	#Appliquer l'arrère plan et le faire bouger
-	relative_x = x % background.get_rect().width
+	relative_x = game.background_origin_x % background.get_rect().width
 	screen.blit(background, (relative_x - background.get_rect().width,0))
-	if relative_x < W:
+	if relative_x < game.W:
 			screen.blit(background,(relative_x,0))
 
-
-
-
-	#appliquer l'image du joueur
-	screen.blit(game.player.image, game.player.rect)
-
-
-
-	#appliquer l'ensemble des images de mon groupe de pics
-	game.all_pics.draw(screen)
-
-"""
-	#récupérer la barre de vie du joueur
-	for Player in game.player:
-		Player.update_health_bar(screen)
-"""
-
-	#recupérer les monstres de mon jeu
-	for Pics in game.all_pics:
-		Pics.forward()
-		Pics.update_health_bar(screen)
-
-
-
-	# vérifier si le joeuur veut aller à gauche ou à droite
-	if game.pressed.get(pygame.K_d):
-		if game.player.rect.x < W*4/10:
-			game.player.image = pygame.image.load("img/SonicStatiqueRight.png")
-			if game.player.rect.x < W*4/10:
-				game.player.move_right()
-		else:
-			x -= 5
-
-	elif game.pressed.get(pygame.K_a):
-		game.player.image = pygame.image.load("img/SonicStatiqueLeft.png")
-		if game.player.rect.x > W*4/10:
-			game.player.move_left()
-		else:
-			x += 5
-
-	"""elif game.pressed.get(pygame.K_SPACE):
-		game.player.move_up()
-	"""
-
-
-	
-	print(game.player.rect.x)
-
-
-
+	#vérifier si le jeu a commencé
+	if game.is_playing:
+		#délencher les instructions de la partie
+		game.update(screen)
+	#vérifier si le jeu n'a pas commencé
+	else:
+		#ajouter l'écran de bienvenue
+		screen.blit(banner, banner_rect)
 
 	#Mise a jour de la fenêtre
 	pygame.display.flip()
-
-
-
 
 	#Si le joueur ferme la fenêtre
 	for event in pygame.event.get():
@@ -97,10 +63,20 @@ while running:
 			running = False
 			pygame.quit()
 
-
 		#detecter si une touche du clavier est laché
 		elif event.type == pygame.KEYDOWN:
 			game.pressed[event.key] = True
+
+			#détecter si la touche espace est enclanchée pour lancer le projectile
+			if event.key == pygame.K_SPACE:
+				game.player.launch_projectile()
+
 		elif event.type == pygame.KEYUP:
 			game.pressed[event.key] = False
 
+		elif event.type == pygame.MOUSEBUTTONDOWN:
+			x_mouse, y_mouse = pygame.mouse.get_pos()
+			#Vérification si clique sur le bouton
+			if x_mouse > play_button_x_min and x_mouse < play_button_x_max and y_mouse < play_button_y_max and y_mouse > play_button_y_min :
+				#mettre le jeu en mode "lancé"
+				game.start()
