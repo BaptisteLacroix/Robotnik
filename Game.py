@@ -3,11 +3,15 @@ from player import Player
 from Monster import Pics
 
 
+run_right_path = "img/running/right/SonicRun"
+img_extension = ".png"
+
 #Classe qui représente le jeu
 class Game:
 
 	W = 1022
 	H = 498
+	runRight = [pygame.image.load(run_right_path+str(i)+img_extension) for i in range(8)]
 
 	def __init__(self):
 		#définir si le jeu a commencé ou non
@@ -32,6 +36,11 @@ class Game:
 		self.all_pics = pygame.sprite.Group()
 		self.player.health = self.player.max_health
 		self.is_playing = False
+
+
+
+
+
 
 	def update(self, screen):
 		#appliquer l'image du joueur
@@ -58,11 +67,11 @@ class Game:
 		# vérifier si le joeuur veut aller à gauche ou à droite
 		if self.pressed.get(pygame.K_d):
 			if self.player.rect.x < Game.W*4/10:
+				right = True
 				self.player.image = pygame.image.load("img/SonicStatiqueRight.png")
-				if self.player.rect.x < Game.W*4/10:
-					self.player.move_right()
+			if self.player.rect.x < Game.W*4/10:
+				self.player.move_right()
 			else:
-				#print(self.background_origin_x)
 				self.background_origin_x -= 5
 
 		print(self.player.rect.x)
@@ -74,3 +83,4 @@ class Game:
 	def spawn_pics(self):
 		pics = Pics(self)
 		self.all_pics.add(pics)
+
