@@ -37,11 +37,6 @@ class Game:
 		self.player.health = self.player.max_health
 		self.is_playing = False
 
-
-
-
-
-
 	def update(self, screen):
 		#appliquer l'image du joueur
 		screen.blit(self.player.image, self.player.rect)
@@ -83,4 +78,3 @@ class Game:
 	def spawn_pics(self):
 		pics = Pics(self)
 		self.all_pics.add(pics)
-
