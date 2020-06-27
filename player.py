@@ -1,11 +1,21 @@
+from typing import List
+
 import pygame
 from projectile import Projectile
-
+from glob import glob
 
 # jump_height = 50
 
+img_loader = lambda img: pygame.transform.scale(pygame.image.load(img), (200, 200))
+left_anim_imgs = list(map(img_loader, glob("./img/running/left/SonicRun*.png")))
+right_anim_imgs = list(map(img_loader, glob("./img/running/right/SonicRun*.png")))
+
 # Joueur Sonic
 class Player(pygame.sprite.Sprite):
+
+    left_anim_iter = iter(left_anim_imgs)
+    right_anim_iter = iter(right_anim_imgs)
+    anim_counter = 0
 
     def __init__(self, game):
         super().__init__()
@@ -13,7 +23,7 @@ class Player(pygame.sprite.Sprite):
         self.attack = 50
         self.health = 102
         self.max_health = 102
-        self.velocity = 2
+        self.velocity = 4
         self.all_projectiles = pygame.sprite.Group()
         self.image = pygame.image.load("img/SonicStatiqueRight.png")
         self.rect = self.image.get_rect()
@@ -48,6 +58,30 @@ class Player(pygame.sprite.Sprite):
 
     def move_up(self):
         self.rect.y -= self.velocity
+
+    def process_movement_animation(self, keys: List[bool]) -> None:
+        """
+        Processes the character movement animation
+        :type keys: list[bool]
+        :param keys: Pressed keys status
+        :return: None
+        """
+        if Player.anim_counter % self.velocity == 0:
+            if keys[pygame.K_a]:
+                try:
+                    self.image = next(Player.left_anim_iter)
+                except(StopIteration):
+                    Player.left_anim_iter = iter(left_anim_imgs)
+                    self.image = next(Player.left_anim_iter)
+            elif keys[pygame.K_d]:
+                try:
+                    self.image = next(Player.right_anim_iter)
+                except(StopIteration):
+                    Player.right_anim_iter = iter(right_anim_imgs)
+                    self.image = next(Player.right_anim_iter)
+            else:
+                self.image = pygame.image.load("img/SonicStatiqueRight.png")
+        Player.anim_counter += 1
 
     """
 

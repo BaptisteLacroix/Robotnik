@@ -1,6 +1,6 @@
 from Game import Game
 from Monster import Pics
-from lib.pygame_functions import *
+import pygame
 
 pygame.init()
 
@@ -29,36 +29,20 @@ banner = pygame.image.load("img/Banniere/banner0.jpg")
 banner = pygame.transform.scale(banner, (game.W, game.H))
 banner_rect = banner.get_rect()
 
+
 #########
 
 running = True
 
 #################
-testSprite = makeSprite("img/running/SonicSprite_resized.gif", 31)
 
-moveSprite(testSprite, 300, 300, True)
-showSprite(testSprite)
-
-nextFrame = clock()
 frame = 0
 
 # Boucle tant que condition est vraie
 while running:
 
-    if clock() > nextFrame:
-        frame = (frame + 1) % 8
-        nextFrame += 80
-
-    if keyPressed(pygame.K_d):
-        changeSpriteImage(testSprite, 0 * 8 + frame)
-
-    elif keyPressed(pygame.K_q):
-        changeSpriteImage(testSprite, 2 * 8 + frame)
-
-    else:
-        game.player.image = pygame.image.load("img/SonicStatiqueRight.png")
-
-    tick(120)
+    keys = pygame.key.get_pressed()
+    game.player.process_movement_animation(keys)
 
     # Appliquer l'arrère plan et le faire bouger
     relative_x = game.background_origin_x % background.get_rect().width
