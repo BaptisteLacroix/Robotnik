@@ -58,11 +58,10 @@ class Game:
         # appliquer l'ensemble des images de mon groupe de pics
         self.all_pics.draw(screen)
 
-        # vérifier si le joeuur veut aller à gauche ou à droite
+        # vérifier si le joueur veut aller à gauche ou à droite
         if self.pressed.get(pygame.K_d):
             if self.player.rect.x < Game.W * 4 / 10:
                 right = True
-                self.player.image = pygame.image.load("img/SonicStatiqueRight.png")
             if self.player.rect.x < Game.W * 4 / 10:
                 self.player.move_right()
             else:
