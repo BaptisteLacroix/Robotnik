@@ -58,7 +58,7 @@ class Game:
         # appliquer l'ensemble des images de mon groupe de pics
         self.all_pics.draw(screen)
 
-        # vérifier si le joueur veut aller à gauche ou à droite
+        # vérifier si le joueur veut aller à gauche, à droite ou sauter
         if self.pressed.get(pygame.K_d):
             if self.player.rect.x < Game.W * 4 / 10:
                 right = True
@@ -66,8 +66,6 @@ class Game:
                 self.player.move_right()
             else:
                 self.background_origin_x -= 5
-
-        print(self.player.rect.x)
 
     def check_collision(self, sprite, group):
         return pygame.sprite.spritecollide(sprite, group, False, pygame.sprite.collide_mask)

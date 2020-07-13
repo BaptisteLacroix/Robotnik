@@ -10,7 +10,7 @@ class Pics(pygame.sprite.Sprite):
         self.attack = 30
         self.health = 50
         self.max_health = 50
-        self.velocity = random.randint(1, 3)
+        self.velocity = random.randint(2, 4)
         self.image = pygame.image.load("img/PicMonstre1.png")
         self.rect = self.image.get_rect()
         self.rect.x = 900 + random.randint(0, 300)

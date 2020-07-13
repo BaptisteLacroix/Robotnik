@@ -10,9 +10,9 @@ img_loader = lambda img: pygame.transform.scale(pygame.image.load(img), (200, 20
 left_anim_imgs = list(map(img_loader, glob("./img/running/left/SonicRun*.png")))
 right_anim_imgs = list(map(img_loader, glob("./img/running/right/SonicRun*.png")))
 
+
 # Joueur Sonic
 class Player(pygame.sprite.Sprite):
-
     left_anim_iter = iter(left_anim_imgs)
     right_anim_iter = iter(right_anim_imgs)
     anim_counter = 0
@@ -29,9 +29,13 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 50
         self.rect.y = 200
+        self.onGround = False
 
-    # self.jumping = False
-    # self.jump_offset = 0
+    def jump(self):
+        if self.onGround == False:
+            return
+        self.velocity = 8
+        self.onGround = False
 
     def damage(self, amount):
         if self.health - amount > amount:
@@ -82,21 +86,3 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.image = pygame.image.load("img/SonicStatiqueRight.png")
         Player.anim_counter += 1
-
-    """
-
-	def do_jumping(Player):
-		global jump_height
-
-		if Player.jumping:
-			Player.jump_offset += 1
-			if Player.jump_offset >= jump_height:
-				Player.jumping = False
-		elif Player.jump_offset > 0 and Player.jumping == False:
-			Player.jump_offset -= 1
-
-
-elif game.pressed.get(pygame.K_SPACE) and player.jumping == False and player.jump_offset == 0:
-		player.jumping = True
-
-		"""

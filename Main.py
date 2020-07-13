@@ -1,5 +1,6 @@
 from Game import Game
 from Monster import Pics
+from player import Player
 import pygame
 
 pygame.init()
@@ -28,7 +29,7 @@ play_button_y_max = 347
 banner = pygame.image.load("img/Banniere/banner0.jpg")
 banner = pygame.transform.scale(banner, (game.W, game.H))
 banner_rect = banner.get_rect()
-
+bannerGameOver = pygame.image.load("img/Banniere/bannerGameOver.jpg")
 
 #########
 
@@ -59,10 +60,10 @@ while running:
         # ajouter l'écran de bienvenue
         screen.blit(banner, banner_rect)
 
+
     # Mise a jour de la fenêtre
     pygame.display.flip()
 
-    # Si le joueur ferme la fenêtre
     for event in pygame.event.get():
         # vérifier la fermeture de la fenêtre
         if event.type == pygame.QUIT:
@@ -73,9 +74,8 @@ while running:
         elif event.type == pygame.KEYDOWN:
             game.pressed[event.key] = True
 
-            # détecter si la touche espace est enclanchée pour lancer le projectile
             if event.key == pygame.K_SPACE:
-                game.player.launch_projectile()
+                Player.jump(self)
 
         elif event.type == pygame.KEYUP:
             game.pressed[event.key] = False
@@ -83,6 +83,9 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             x_mouse, y_mouse = pygame.mouse.get_pos()
             # Vérification si clique sur le bouton
-            if play_button_x_min < x_mouse < play_button_x_max and play_button_y_max > y_mouse > play_button_y_min:
+            if not game.is_playing and play_button_x_min < x_mouse < play_button_x_max and play_button_y_max > y_mouse > play_button_y_min:
                 # mettre le jeu en mode "lancé"
                 game.start()
+            # détecter si le click gauche est enclanché pour lancer le projectile
+            elif game.is_playing and pygame.mouse.get_pressed()[0]:
+                game.player.launch_projectile()
