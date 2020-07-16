@@ -2,9 +2,20 @@ import pygame
 import random
 
 
-class Pics(pygame.sprite.Sprite):
+class Pic(pygame.sprite.Sprite):
+    """
+    Des Pics contenant toutes leur caractéristiques.
+    """
 
     def __init__(self, game):
+        """
+        Initalise les monstre en créant:
+            - leur images
+            - leur points de vie
+            - leur points d'attaque
+            - leur vitesse
+        :param game:
+        """
         super().__init__()
         self.game = game
         self.attack = 30
@@ -17,6 +28,11 @@ class Pics(pygame.sprite.Sprite):
         self.rect.y = 300
 
     def damage(self, amount):
+        """
+        Permet d'infliger les dégats au Joueur.
+        :param amount: Montant des dégats qui doivent être infligé.
+        :return:
+        """
         # infliger les dégats
         self.health -= amount
 
@@ -28,11 +44,20 @@ class Pics(pygame.sprite.Sprite):
             self.health = self.max_health
 
     def update_health_bar(self, surface):
+        """
+        Permet de mettre à jour la barre de vie des monstres.
+        :param surface: Surface sur laquelle afficher les éléments graphiques.
+        :return:
+        """
         # dessiner la barre de vie
         pygame.draw.rect(surface, (60, 63, 60), [self.rect.x + 10, self.rect.y - 10, self.max_health, 5])
         pygame.draw.rect(surface, (238, 158, 20), [self.rect.x + 10, self.rect.y - 10, self.health, 5])
 
     def forward(self):
+        """
+        Permet de faire avancer le monstre en vérifiant qu'il ne rentre pas en collision avec le joueur.
+        :return:
+        """
         # déplacement se fait que si il n'y a pas de collision  avec un groupe de joueur
         if not self.game.check_collision(self, self.game.all_players):
             self.rect.x -= self.velocity
