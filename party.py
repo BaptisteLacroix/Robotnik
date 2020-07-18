@@ -4,6 +4,7 @@ from monster import Pic
 
 run_right_path = "img/running/right/SonicRun"
 img_extension = ".png"
+background = pygame.image.load("img/Green_Hill.png")
 
 
 # Classe qui représente le jeu
@@ -14,6 +15,7 @@ class Party:
     W = 1022
     H = 498
     runRight = [pygame.image.load(run_right_path + str(i) + img_extension) for i in range(8)]
+    is_playing = False
 
     def __init__(self):
         """
@@ -22,7 +24,6 @@ class Party:
             - deux groupes contenant respectivement les joueurs de la partie et les futurs projectiles
         """
         # définir si le jeu a commencé ou non
-        self.is_playing = False
         self.running = True
         # position du fond
         self.background_origin_x = 0
@@ -39,7 +40,7 @@ class Party:
         Permet le lancement de la partie avec l'apparition de 2 pièges (chaque piège détruit est renouvelé)
         :return:
         """
-        self.is_playing = True
+        Party.is_playing = True
         self.spawn_pics()
         self.spawn_pics()
 
@@ -51,42 +52,52 @@ class Party:
         # TODO: remettre le jeu à zéro
         self.all_pics = pygame.sprite.Group()
         self.player.health = self.player.max_health
-        self.is_playing = False
+        print("GameOver")
+        Party.is_playing = False
 
-    def update(self, screen):
+    def move_background(self, screen):
         """
-        Met a jour les composants (Barre de vie, projectiles, etc...) de la partie.
+
         :param screen: Surface sur laquelle afficher les éléments graphiques.
         :return:
         """
-        # Appliquer l'arrère plan et le faire bouger
-        relative_x = self.background_origin_x % Party.background.get_rect().width
-        screen.blit(Party.background, (relative_x - Party.background.get_rect().width, 0))
+        relative_x = self.background_origin_x % background.get_rect().width
+        screen.blit(background, (relative_x - background.get_rect().width, 0))
         if relative_x < self.W:
-            screen.blit(Party.background, (relative_x, 0))
+            screen.blit(background, (relative_x, 0))
 
-        # appliquer l'image du joueur
-        screen.blit(self.player.image, self.player.rect)
+    def update_player(self, screen):
+        """
 
-        # Actualiser la barre de vie du joueur
+        :param screen:
+        :return:
+        """
+        keys = pygame.key.get_pressed()
+        events = pygame.event.get()
+
+        for event in events:
+            # detecter si une touche du clavier est laché
+            if event.type == pygame.KEYDOWN:
+                self.pressed[event.key] = True
+
+                if event.key == pygame.K_SPACE:
+                    print("saut")
+                    Player.jump(self.player)  # TODO: move in update_player
+
+                if event.key == pygame.K_ESCAPE:
+                    self.game_over()
+
+            elif event.type == pygame.KEYUP:
+                self.pressed[event.key] = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # détecter si le click gauche est enclanché pour lancer le projectile
+                if Party.is_playing and pygame.mouse.get_pressed()[0]:
+                    self.player.launch_projectile()  # TODO: move in update_player
+
         self.player.update_health_bar(screen)
-
-        # Récupérer les projectiles du joueur
-        for projectile in self.player.all_projectiles:
-            projectile.move()
-
-        # recupérer les monstres de mon jeu
-        for pic in self.all_pics:
-            pic.forward()
-            pic.update_health_bar(screen)
-
-        # ppliquer l'image des projectiles
-        self.player.all_projectiles.draw(screen)
-
-        # appliquer l'ensemble des images de mon groupe de pics
-        self.all_pics.draw(screen)
-
-        # vérifier si le joueur veut aller à gauche, à droite ou sauter
+        screen.blit(self.player.image, self.player.rect) # TODO: check position
+        self.player.process_movement_animation(keys)
         if self.pressed.get(pygame.K_d):
             if self.player.rect.x < Party.W * 4 / 10:
                 right = True
@@ -95,9 +106,44 @@ class Party:
             else:
                 self.background_origin_x -= 5
 
+    def update_pics(self, screen):
+        """
+
+        :param screen:
+        :return:
+        """
+        for pic in self.all_pics:
+            pic.forward(self)
+            pic.update_health_bar(screen)
+        self.all_pics.draw(screen)
+
+    def update_projectiles(self, screen):
+        """
+
+        :param screen:
+        :return:
+        """
+        for projectile in self.player.all_projectiles:
+            projectile.move()
+        self.player.all_projectiles.draw(screen)
+
+    def loop(self, screen):
+        """
+        Met a jour les composants (Barre de vie, projectiles, etc...) de la partie.
+        :param screen: Surface sur laquelle afficher les éléments graphiques.
+        :return:
+        """
+        # Appliquer l'arrère plan et le faire bouger
+        self.move_background()
+        # actualise les éléments graphiques
+        self.update_projectiles(screen)
+        self.update_pics(screen)
+        self.update_player(screen)
+
         # détecter si le click gauche est enclanché pour lancer le projectile
-        if self.is_playing and pygame.mouse.get_pressed()[0]:
-            self.player.launch_projectile()
+        if pygame.mouse.get_pressed()[0]:
+            self.player.launch_projectile() # TODO: move in update_player
+
 
     def check_collision(self, sprite, group):
         """
@@ -113,5 +159,5 @@ class Party:
         Crée un piège (Pic) et l'ajoute à l'ensemble des pièges existants.
         :return:
         """
-        pics = Pic(self)
+        pics = Pic()
         self.all_pics.add(pics)

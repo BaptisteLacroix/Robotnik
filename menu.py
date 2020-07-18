@@ -1,8 +1,6 @@
 import pygame
 from party import Party
 
-game = Party()
-
 
 class Menu:
     """
@@ -17,9 +15,9 @@ class Menu:
 
     # importer/charger la bannière
     banner = pygame.image.load("img/Banniere/banner0.jpg")
-    banner = pygame.transform.scale(banner, (game.W, game.H))
+    banner = pygame.transform.scale(banner, (Party.W, Party.H))
     banner_rect = banner.get_rect()
-    bannerPartyOver = pygame.image.load("img/Banniere/bannerPartyOver.jpg")
+    # bannerPartyOver = pygame.image.load("img/Banniere/bannerPartyOver.jpg")
 
     #########
 
@@ -33,6 +31,45 @@ class Menu:
         self.is_active = True
         self.screen = screen
 
+    def update_screen(self):
+        """
+        Affiche l'image du menu et met à jour la fenêtre.
+        :return:
+        """
+        self.screen.blit(Menu.banner, Menu.banner_rect)
+        # Mise a jour de la fenêtre
+        pygame.display.flip()
+
+    def quit(self):
+        """
+        Quitte la fenêtre.
+        :return:
+        """
+        pygame.quit()
+
+    def check_play_button(self):
+        """
+        Vérifie si l'utilisateur a cliqué sur le bouton "PLAY".
+        :return:
+        """
+        x_mouse, y_mouse = pygame.mouse.get_pos()
+        # Vérification si clique sur le bouton
+        if not Party.is_playing \
+                and Menu.play_button_x_min < x_mouse < Menu.play_button_x_max \
+                and Menu.play_button_y_max > y_mouse > Menu.play_button_y_min:
+            # mettre le jeu en mode "lancé"
+            self.create_party()
+
+
+    def create_party(self):
+        """
+        Crée une partie.
+        :return:
+        """
+        party = Party()
+        #game.running = True # TODO: move in game.start
+        party.start()
+
     def loop(self):
         """
         Boucle permettant de faire tourner le menu avec :
@@ -41,26 +78,24 @@ class Menu:
         :return:
         """
         while self.is_active:
-            self.screen.blit(Menu.banner, Menu.banner_rect)
+            self.update_screen()
 
             for event in pygame.event.get():
                 # vérifier la fermeture de la fenêtre
                 if event.type == pygame.QUIT:
-                    game.is_playing = False
-                    pygame.quit()
+                    self.quit()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    x_mouse, y_mouse = pygame.mouse.get_pos()
-                    # Vérification si clique sur le bouton
-                    if not game.is_playing and Menu.play_button_x_min < x_mouse < Menu.play_button_x_max and Menu.play_button_y_max > y_mouse > Menu.play_button_y_min:
-                        # mettre le jeu en mode "lancé"
-                        game.start()
+                    self.check_play_button()
 
             # vérifier si le jeu a commencé
-            if game.is_playing:
+            # TODO: move in game.loop
+            if Party.is_playing:
+                pass
                 # délencher les instructions de la partie
-                game.update(self.screen)
+                # TODO: move in game.loop : party.update(self.screen)
             # vérifier si le jeu n'a pas commencé
-            else:
+
+            """else:
                 # ajouter l'écran de bienvenue
-                self.screen.blit(Menu.banner, Menu.banner_rect)
+                self.screen.blit(Menu.banner, Menu.banner_rect)"""
