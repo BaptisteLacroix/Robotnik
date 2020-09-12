@@ -24,7 +24,7 @@ class Party:
             - deux groupes contenant respectivement les joueurs de la partie et les futurs projectiles
         """
         # définir si le jeu a commencé ou non
-        self.running = True
+        # self.running = True
         # position du fond
         self.background_origin_x = 0
         # générer le joueur
@@ -41,6 +41,7 @@ class Party:
         :return:
         """
         Party.is_playing = True
+        # self.running = True
         self.spawn_pics()
         self.spawn_pics()
 
@@ -55,9 +56,18 @@ class Party:
         print("GameOver")
         Party.is_playing = False
 
+    def check_collision(sprite, group):
+        """
+        Vérifie et renvoie si le sprite donné entre en collision avec l'un des éléments du groupe (group) donné.
+        :param sprite: élément graphique (Joueur, projectile, ...) dont l'on souhaite tester la collision
+        :param group: Groupe contenant un ensemble d'éléments graphiques (pièges, ...)
+        :return: s'il y a collision ou pas
+        """
+        return pygame.sprite.spritecollide(sprite, group, False, pygame.sprite.collide_mask)
+
     def move_background(self, screen):
         """
-
+        Permet de mettre en mouvement l'arrière plan.
         :param screen: Surface sur laquelle afficher les éléments graphiques.
         :return:
         """
@@ -66,15 +76,12 @@ class Party:
         if relative_x < self.W:
             screen.blit(background, (relative_x, 0))
 
-    def update_player(self, screen):
+    def keypressed(self, events):
         """
-
-        :param screen:
+        Permet de prendre en compte si une touche est pressé ou laché.
+        :param events:
         :return:
         """
-        keys = pygame.key.get_pressed()
-        events = pygame.event.get()
-
         for event in events:
             # detecter si une touche du clavier est laché
             if event.type == pygame.KEYDOWN:
@@ -82,7 +89,7 @@ class Party:
 
                 if event.key == pygame.K_SPACE:
                     print("saut")
-                    Player.jump(self.player)  # TODO: move in update_player
+                    Player.jump(self.player)
 
                 if event.key == pygame.K_ESCAPE:
                     self.game_over()
@@ -90,14 +97,37 @@ class Party:
             elif event.type == pygame.KEYUP:
                 self.pressed[event.key] = False
 
+    def mousepressed(self, events):
+        """
+        Permet de prendre en compte si le clique de la souris est pressé ou laché.
+        :param events:
+        :return:
+        """
+        for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # détecter si le click gauche est enclanché pour lancer le projectile
                 if Party.is_playing and pygame.mouse.get_pressed()[0]:
-                    self.player.launch_projectile()  # TODO: move in update_player
+                    self.player.launch_projectile()
 
+                # détecter si le click gauche est enclanché pour lancer le projectile
+                if pygame.mouse.get_pressed()[0]:
+                    self.player.launch_projectile()
+
+    def update_player(self, screen):
+        """
+
+        :param screen: Surface sur laquelle afficher les éléments graphiques.
+        :return:
+        """
+        keys = pygame.key.get_pressed()
+        events = pygame.event.get()
+
+        self.keypressed(events)
+        self.mousepressed(events)
         self.player.update_health_bar(screen)
         screen.blit(self.player.image, self.player.rect) # TODO: check position
         self.player.process_movement_animation(keys)
+
         if self.pressed.get(pygame.K_d):
             if self.player.rect.x < Party.W * 4 / 10:
                 right = True
@@ -109,7 +139,7 @@ class Party:
     def update_pics(self, screen):
         """
 
-        :param screen:
+        :param screen: Surface sur laquelle afficher les éléments graphiques.
         :return:
         """
         for pic in self.all_pics:
@@ -120,7 +150,7 @@ class Party:
     def update_projectiles(self, screen):
         """
 
-        :param screen:
+        :param screen: Surface sur laquelle afficher les éléments graphiques.
         :return:
         """
         for projectile in self.player.all_projectiles:
@@ -134,25 +164,15 @@ class Party:
         :return:
         """
         # Appliquer l'arrère plan et le faire bouger
-        self.move_background()
+        self.move_background(screen)
         # actualise les éléments graphiques
         self.update_projectiles(screen)
         self.update_pics(screen)
         self.update_player(screen)
-
-        # détecter si le click gauche est enclanché pour lancer le projectile
-        if pygame.mouse.get_pressed()[0]:
-            self.player.launch_projectile() # TODO: move in update_player
-
-
-    def check_collision(self, sprite, group):
-        """
-        Vérifie et renvoie si le sprite donné entre en collision avec l'un des éléments du groupe (group) donné.
-        :param sprite: élément graphique (Joueur, projectile, ...) dont l'on souhaite tester la collision
-        :param group: Groupe contenant un ensemble d'éléments graphiques (pièges, ...)
-        :return: s'il y a collision ou pas
-        """
-        return pygame.sprite.spritecollide(sprite, group, False, pygame.sprite.collide_mask)
+        # vérifier si le jeu a commencé
+        if Party.is_playing:
+            # délencher les instructions de la partie
+            self.loop(self.screen)
 
     def spawn_pics(self):
         """
